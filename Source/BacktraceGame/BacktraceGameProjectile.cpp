@@ -3,6 +3,11 @@
 #include "BacktraceGameProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "BacktraceWrapper.h"
+
+#if PLATFORM_ANDROID
+extern FString GFilePathBase;
+#endif
 
 ABacktraceGameProjectile::ABacktraceGameProjectile() 
 {
@@ -49,6 +54,33 @@ void ABacktraceGameProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
     if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && OtherComp->IsSimulatingPhysics())
     {
         OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
+
+		TMap<FString, FString> BacktraceAttributes;
+
+		BacktraceAttributes.Add("custom.attributeTPM1", "Hi Jason!");
+		BacktraceAttributes.Add("custom.attributeTPM2", "Hi Vincent!");
+		BacktraceAttributes.Add("custom.attributeTPM3", "Hi Drake!");
+		UE_LOG(LogTemp, Error, TEXT("About to initialize Backtrace Client"));
+
+		FString FileName = TEXT("/MyCustomFile.txt");
+		FString FilePath = FPaths::ProjectSavedDir() + FileName;
+		UE_LOG(LogTemp, Error, TEXT("File path %s"), *FilePath)
+
+		bool success = FPaths::FileExists(FilePath);
+		UE_LOG(LogTemp, Error, TEXT("Does file exist? %d"), success)
+
+		#if PLATFORM_ANDROID
+			FilePath = GFilePathBase + FString("/UE4Game/") + FApp::GetName() + TEXT("/") + FApp::GetName() + TEXT("/Saved") + FileName;
+			UE_LOG(LogTemp, Error, TEXT("Android file path %s"), *FilePath)
+		#endif
+
+		TArray<FString> Attachments;
+		Attachments.Add(FilePath);
+
+		BacktraceIO::FInitializeBacktraceClient(BacktraceAttributes, Attachments);
+
+		FString FileContent = TEXT("Some data\nSome other data\nLast line of data\n");
+		FFileHelper::SaveStringToFile(FileContent, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_NoFail);
         
         #if PLATFORM_MAC
             NSException* myException = [NSException
@@ -58,9 +90,11 @@ void ABacktraceGameProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
             @throw myException;
         #elif PLATFORM_IOS || PLATFORM_TVOS
             @[][666];
-        #elif PLATFORM_WINDOWS
-			memset(ptr, 0x42, 20 * 1000 * 1000);
-        #endif
+		#endif
+
+		// try to kill default (works on Windows etc)
+		memset(ptr, 0x42, 20 * 1000 * 1000);
+        
         
         Destroy();
     }
