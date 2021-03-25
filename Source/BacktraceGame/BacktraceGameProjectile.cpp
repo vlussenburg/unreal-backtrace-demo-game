@@ -8,6 +8,9 @@
 #if PLATFORM_ANDROID
 extern FString GFilePathBase;
 #endif
+#if PLATFORM_IOS
+#import <Backtrace/Backtrace-Swift.h>
+#endif
 
 ABacktraceGameProjectile::ABacktraceGameProjectile() 
 {
@@ -50,10 +53,10 @@ ABacktraceGameProjectile::ABacktraceGameProjectile()
 void * volatile ptr;
 void ABacktraceGameProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    // Only add impulse and destroy projectile if we hit a physics
-    if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && OtherComp->IsSimulatingPhysics())
-    {
-        OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
+	// Only add impulse and destroy projectile if we hit a physics
+	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && OtherComp->IsSimulatingPhysics())
+	{
+		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 
 		TMap<FString, FString> BacktraceAttributes;
 
@@ -81,21 +84,33 @@ void ABacktraceGameProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
 
 		FString FileContent = TEXT("Some data\nSome other data\nLast line of data\n");
 		FFileHelper::SaveStringToFile(FileContent, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_NoFail);
-        
-        #if PLATFORM_MAC
-            NSException* myException = [NSException
-                exceptionWithName : @"ForceCrash"
-                reason : @"Force Crash on purpose"
-                userInfo:nil];
-            @throw myException;
-        #elif PLATFORM_IOS || PLATFORM_TVOS
-            @[][666];
+
+		#if PLATFORM_IOS
+			BacktraceCredentials *credentials = [[BacktraceCredentials alloc]
+								initWithEndpoint: [NSURL URLWithString: @"https://cd03.sp.backtrace.io:6098/"]
+								token: @"459bd6c479f30dfd9043ca25e82822f9a8f46acd99d834faf8e9cc71df61c77a"];
+			BacktraceClient.shared = [[BacktraceClient alloc] initWithCredentials: credentials error: nil];
+			NSString* message = @"Unreal Engine iOS Test";
+			NSArray* array = [NSArray arrayWithObjects: @"", nil];
+			[[BacktraceClient shared] sendWithMessage: message attachmentPaths: array completion:^(BacktraceResult * _Nonnull result) {
+			}];
+		#endif
+
+		
+		#if PLATFORM_MAC
+			NSException* myException = [NSException
+				exceptionWithName : @"ForceCrash"
+				reason : @"Force Crash on purpose"
+				userInfo:nil];
+			@throw myException;
+		#elif PLATFORM_IOS || PLATFORM_TVOS
+			@[][666];
 		#endif
 
 		// try to kill default (works on Windows etc)
 		memset(ptr, 0x42, 20 * 1000 * 1000);
-        
-        
-        Destroy();
-    }
+		
+		
+		Destroy();
+	}
 }

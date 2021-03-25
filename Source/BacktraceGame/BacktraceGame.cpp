@@ -3,5 +3,5 @@
 #include "BacktraceGame.h"
 #include "Modules/ModuleManager.h"
 
+
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, BacktraceGame, "BacktraceGame" );
- 

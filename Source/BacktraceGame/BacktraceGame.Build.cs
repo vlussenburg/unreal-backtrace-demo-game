@@ -12,8 +12,21 @@ public class BacktraceGame : ModuleRules
 		
 		if (Target.Platform == UnrealTargetPlatform.Android)
 		{
-            string PluginPath = Utils.MakePathRelativeTo(ModuleDirectory, Target.RelativeEnginePath);
+			string PluginPath = Utils.MakePathRelativeTo(ModuleDirectory, Target.RelativeEnginePath);
 			AdditionalPropertiesForReceipt.Add("AndroidPlugin", System.IO.Path.Combine(PluginPath, "BacktraceAndroid_UPL.xml"));
+		} 
+		else if (Target.Platform == UnrealTargetPlatform.IOS)
+		{
+			PublicAdditionalFrameworks.AddRange(new Framework[] {
+				new Framework("Backtrace",
+							"../../Frameworks/Backtrace.framework",
+							"",
+							true),
+				new Framework("Backtrace_PLCrashReporter",
+							"../../Frameworks/Backtrace_PLCrashReporter.framework",
+							"",
+							true)
+			});
 		}
 	}
 }
