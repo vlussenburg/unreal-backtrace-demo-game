@@ -85,7 +85,13 @@ void ABacktraceGameProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
 		FString FileContent = TEXT("Some data\nSome other data\nLast line of data\n");
 		FFileHelper::SaveStringToFile(FileContent, *FilePath, FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(), EFileWrite::FILEWRITE_NoFail);
 
-		#if PLATFORM_IOS
+		#if PLATFORM_MAC
+			NSException* myException = [NSException
+				exceptionWithName : @"ForceCrash"
+				reason : @"Force Crash on purpose"
+				userInfo:nil];
+			@throw myException;
+		#elif PLATFORM_IOS || PLATFORM_TVOS
 			BacktraceCredentials *credentials = [[BacktraceCredentials alloc]
 								initWithEndpoint: [NSURL URLWithString: @"https://cd03.sp.backtrace.io:6098/"]
 								token: @"459bd6c479f30dfd9043ca25e82822f9a8f46acd99d834faf8e9cc71df61c77a"];
@@ -94,21 +100,11 @@ void ABacktraceGameProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
 			NSArray* array = [NSArray arrayWithObjects: @"", nil];
 			[[BacktraceClient shared] sendWithMessage: message attachmentPaths: array completion:^(BacktraceResult * _Nonnull result) {
 			}];
+			//@[][666];
+		#else
+			// try to kill default (works on Windows etc)
+			memset(ptr, 0x42, 20 * 1000 * 1000);
 		#endif
-
-		
-		#if PLATFORM_MAC
-			NSException* myException = [NSException
-				exceptionWithName : @"ForceCrash"
-				reason : @"Force Crash on purpose"
-				userInfo:nil];
-			@throw myException;
-		#elif PLATFORM_IOS || PLATFORM_TVOS
-			@[][666];
-		#endif
-
-		// try to kill default (works on Windows etc)
-		memset(ptr, 0x42, 20 * 1000 * 1000);
 		
 		
 		Destroy();
