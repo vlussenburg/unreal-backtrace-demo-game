@@ -1,0 +1,6 @@
+framework module Backtrace_PLCrashReporter {
+  umbrella header "Backtrace-PLCrashReporter-umbrella.h"
+
+  export *
+  module * { export * }
+}
