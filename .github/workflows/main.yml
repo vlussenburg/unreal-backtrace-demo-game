@@ -26,7 +26,7 @@ jobs:
           
       - name: run docker
         run: | 
-         echo ${GHPR_TOKEN} | docker login ghcr.io -u vlussenburg --password-stdin
+         docker login ghcr.io --username vlussenburg --password ${GHPR_TOKEN}
          docker run --rm -v "${PWD}:/project" ghcr.io/epicgames/unreal-engine:dev-4.27 ./Build.sh
          
 #       - name: Log in to the Container registry
