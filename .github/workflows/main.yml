@@ -54,12 +54,16 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GHPR_TOKEN }}
-          
+      - name: pull image
+        run: docker pull ghcr.io/epicgames/unreal-engine:dev-4.27
+
+      - name: free disk space
+        run: df -h
+
       - name: run docker
         run: | 
-         docker run --rm -v "${PWD}:/project" ghcr.io/epicgames/unreal-engine:dev-4.27 ./Build.sh
-         
-          
+         docker run --rm -v "${PWD}:/project" ghcr.io/epicgames/unreal-engine:dev-4.27 /project/Build.sh
+     
 #       - name: Extract metadata (tags, labels) for Docker
 #         id: meta
 #         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
