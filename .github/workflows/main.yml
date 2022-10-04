@@ -62,7 +62,7 @@ jobs:
 
       - name: run docker
         run: | 
-         docker run --rm -v "${PWD}:/project" ghcr.io/epicgames/unreal-engine:dev-4.27 /project/Build.sh
+         docker run --rm -v "${PWD}:/project" ghcr.io/epicgames/unreal-engine:dev-4.27 sh /project/Build.sh
      
 #       - name: Extract metadata (tags, labels) for Docker
 #         id: meta
