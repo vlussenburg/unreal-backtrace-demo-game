@@ -26,12 +26,14 @@ jobs:
           echo "Free space:"
           df -h
           
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
+      - name: free disk space
+        run: | 
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo apt clean
+          docker rmi $(docker image ls -aq)
+          df -h
+
       - name: Checkout
         uses: actions/checkout@v2
 
