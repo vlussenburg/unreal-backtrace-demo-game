@@ -27,7 +27,7 @@ jobs:
           sudo rm -f /swapfile
           sudo apt clean
           docker rmi $(docker image ls -aq)
-          docker system prune
+          docker system prune --force
           sudo rm -rf "/usr/local/share/boost"
           sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           df -h
