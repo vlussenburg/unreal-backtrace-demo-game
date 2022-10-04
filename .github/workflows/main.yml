@@ -20,38 +20,31 @@ jobs:
       packages: write
 
     steps:
-
-      - name: Build
-        run: |
-          echo "Free space:"
-          df -h
-          
       - name: free disk space
         run: | 
+          df -h
           sudo swapoff -a
           sudo rm -f /swapfile
           sudo apt clean
           docker rmi $(docker image ls -aq)
+          docker system prune
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
           df -h
 
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 512
-          remove-dotnet: 'true'
-          remove-haskell: 'true'
-          remove-android: 'true'
-          build-mount-path: /
+#       - name: Maximize build space
+#         uses: easimon/maximize-build-space@master
+#         with:
+#           root-reserve-mb: 512
+#           swap-size-mb: 512
+#           remove-dotnet: 'true'
+#           remove-haskell: 'true'
+#           remove-android: 'true'
+#           build-mount-path: /
 
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build
-        run: |
-          echo "Free space:"
-          df -h
-    
       - name: Checkout repository
         uses: actions/checkout@v2
         
